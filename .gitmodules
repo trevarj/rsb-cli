@@ -1,0 +1,3 @@
+[submodule "rsb"]
+	path = rsb
+	url = https://github.com/trevarj/rsb

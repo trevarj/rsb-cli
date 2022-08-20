@@ -1,0 +1,16 @@
+[package]
+name = "rsb-cli"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[profile.release]
+opt-level = "s"
+strip = true
+
+[dependencies]
+dialoguer = { features = ["fuzzy-select"], git = "https://github.com/Araxeus/dialoguer" }
+
+[build-dependencies]
+quote = "1.0"
