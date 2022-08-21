@@ -65,6 +65,7 @@ fn main() {
     println!("cargo:warning=Writing file {}", dest_path.display());
     let books_len = books.len();
     let module = quote! {
+        #[derive(Debug, Clone, Copy)]
         pub struct Book {
             pub title: &'static str,
             pub chapters: &'static [&'static [&'static str]],
@@ -90,6 +91,14 @@ fn main() {
             type Output = [&'static [&'static str]];
 
             fn index(&self, range: std::ops::RangeFull) -> &Self::Output {
+                &self.chapters[range]
+            }
+        }
+
+        impl std::ops::Index<std::ops::RangeInclusive<usize>> for Book {
+            type Output = [&'static [&'static str]];
+
+            fn index(&self, range: std::ops::RangeInclusive<usize>) -> &Self::Output {
                 &self.chapters[range]
             }
         }

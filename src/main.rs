@@ -1,54 +1,18 @@
-use dialoguer::console::Term;
-use dialoguer::{FuzzySelect, MultiSelect};
-
-use crate::theme::Theme;
+use crate::args::{Args, Error};
+use gumdrop::Options;
 
 include!(concat!(env!("OUT_DIR"), "/rsb.rs"));
 
-mod theme;
+mod args;
 
-fn main() {
-    println!("Genesis 1:1 {}", BOOKS[0][0][0]);
+fn main() -> Result<(), Error> {
+    let args = Args::parse_args_default_or_exit();
 
-    println!("Matthew 1 \n{}", BOOKS[51][0].join("\n"));
-
-    let book = FuzzySelect::with_theme(&Theme::book())
-        .with_prompt("Select a Book")
-        .default(0)
-        .items(&BOOKS.iter().map(|b| b.title).collect::<Vec<&str>>())
-        .interact_on_opt(&Term::stdout())
-        .unwrap()
-        .unwrap()
-        .0;
-
-    let chapters: Vec<String> = (1..BOOKS[book][..].len())
-        .map(|n| format!("Глава {}", n))
-        .collect();
-
-    let chapter = FuzzySelect::with_theme(&Theme::chapter())
-        .with_prompt("Select a chapter")
-        .default(0)
-        .items(&chapters)
-        .interact_on_opt(&Term::stdout())
-        .unwrap()
-        .unwrap()
-        .0;
-
-    let book_title = BOOKS[book].title;
-    let verses = MultiSelect::with_theme(&Theme::verse())
-        .with_prompt("Select a verse")
-        .items(&BOOKS[book][chapter])
-        .interact_on_opt(&Term::stdout())
-        .unwrap()
-        .unwrap();
-
-    for v in verses {
-        println!(
-            "[{} {}:{}] {}",
-            book_title,
-            chapter + 1,
-            v + 1,
-            BOOKS[book][chapter][v]
-        );
+    if let Some(book) = args.book {
+        match String::try_from(book) {
+            Ok(s) => println!("{}", s),
+            Err(e) => eprintln!("{}", e),
+        }
     }
+    Ok(())
 }

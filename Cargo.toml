@@ -10,7 +10,8 @@ opt-level = "s"
 strip = true
 
 [dependencies]
-dialoguer = { features = ["fuzzy-select"], git = "https://github.com/Araxeus/dialoguer" }
+gumdrop = "0.8"
+thiserror = "1.0"
 
 [build-dependencies]
 quote = "1.0"
