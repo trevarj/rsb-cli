@@ -11,6 +11,7 @@ strip = true
 
 [dependencies]
 gumdrop = "0.8"
+textwrap = { version = "0.15", default-features = false, features = ["smawk", "unicode-width"] }
 thiserror = "1.0"
 
 [build-dependencies]

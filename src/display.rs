@@ -1,5 +1,7 @@
 use std::fmt::Write;
 
+use textwrap::{fill, Options};
+
 use crate::args::{Book as ArgBook, Chapter, Verses};
 use crate::{Error, BOOKS};
 
@@ -11,6 +13,9 @@ impl TryFrom<ArgBook> for String {
         let book = BOOKS[num];
 
         let mut out = String::new();
+        let indent = " ".repeat(alias.len() + 9);
+        let opts = Options::new(80).subsequent_indent(&indent);
+
         if let Some(ch) = arg_book.chapter() {
             match ch {
                 Chapter::Single {
@@ -34,11 +39,25 @@ impl TryFrom<ArgBook> for String {
                     match verses {
                         Verses::Single(verse) => {
                             check_verse(*verse)?;
-                            write_verse(&mut out, alias, *chapter, *verse, book[*chapter][*verse])?;
+                            write_verse(
+                                &mut out,
+                                &opts,
+                                alias,
+                                *chapter,
+                                *verse,
+                                book[*chapter][*verse],
+                            )?;
                         }
                         Verses::Range(range) => {
                             for v in book[*chapter][range.clone()].iter().enumerate() {
-                                write_verse(&mut out, alias, *chapter, v.0 + range.start(), v.1)?;
+                                write_verse(
+                                    &mut out,
+                                    &opts,
+                                    alias,
+                                    *chapter,
+                                    v.0 + range.start(),
+                                    v.1,
+                                )?;
                             }
                         }
                     }
@@ -46,14 +65,14 @@ impl TryFrom<ArgBook> for String {
                 Chapter::Single { chapter, .. } => {
                     // print a single chapter
                     for v in book[*chapter].iter().enumerate() {
-                        write_verse(&mut out, alias, *chapter, v.0, v.1)?;
+                        write_verse(&mut out, &opts, alias, *chapter, v.0, v.1)?;
                     }
                 }
                 Chapter::Range(range) => {
                     // print a range of chapters
                     for ch in book[range.clone()].iter().enumerate() {
                         for v in ch.1.iter().enumerate() {
-                            write_verse(&mut out, alias, ch.0 + range.start(), v.0, v.1)?;
+                            write_verse(&mut out, &opts, alias, ch.0 + range.start(), v.0, v.1)?;
                         }
                     }
                 }
@@ -62,7 +81,7 @@ impl TryFrom<ArgBook> for String {
             // print entire book!
             for ch in book.chapters.iter().enumerate() {
                 for v in ch.1.iter().enumerate() {
-                    write_verse(&mut out, alias, ch.0, v.0, v.1)?;
+                    write_verse(&mut out, &opts, alias, ch.0, v.0, v.1)?;
                 }
             }
         }
@@ -73,18 +92,21 @@ impl TryFrom<ArgBook> for String {
 
 fn write_verse(
     out: &mut String,
+    opts: &Options,
     book: &str,
     chapter_num: usize,
     verse_num: usize,
     verse: &str,
 ) -> Result<(), std::fmt::Error> {
-    writeln!(
-        out,
-        "[{} {}:{}] {}",
-        book,
-        chapter_num + 1,
-        verse_num + 1,
-        verse
-    )?;
+    let s = fill(
+        &format!(
+            "{:<width$} {}",
+            format!("[{} {}:{}]", book, chapter_num + 1, verse_num + 1),
+            verse,
+            width = book.len() + 8
+        ),
+        opts,
+    );
+    writeln!(out, "{}", s)?;
     Ok(())
 }

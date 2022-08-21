@@ -3,8 +3,6 @@ use std::str::FromStr;
 
 use gumdrop::Options;
 
-use crate::BOOKS;
-
 /// Read the Russian Sinod Bible from the command-line
 #[derive(Debug, Options)]
 pub struct Args {
@@ -33,10 +31,6 @@ macro_rules! book_command {
                         Self::$alias(..) => (stringify!($alias), $num)
                     ),*
                 }
-            }
-
-            pub fn title(&self) -> &str {
-                BOOKS[self.alias_num().1].title
             }
 
             pub fn chapter(&self) -> &Option<Chapter> {
