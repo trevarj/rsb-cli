@@ -4,6 +4,7 @@ use gumdrop::Options;
 include!(concat!(env!("OUT_DIR"), "/rsb.rs"));
 
 mod args;
+mod display;
 
 fn main() -> Result<(), Error> {
     let args = Args::parse_args_default_or_exit();

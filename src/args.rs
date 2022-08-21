@@ -1,4 +1,3 @@
-use std::fmt::Write;
 use std::ops::RangeInclusive;
 use std::str::FromStr;
 
@@ -49,92 +48,6 @@ macro_rules! book_command {
             }
         }
     };
-}
-
-impl TryFrom<Book> for String {
-    type Error = Error;
-
-    fn try_from(book: Book) -> Result<Self, Self::Error> {
-        let (alias, num) = book.alias_num();
-
-        let mut out = String::new();
-        if let Some(ch) = book.chapter() {
-            let book = BOOKS[num];
-            match ch {
-                Chapter::Single {
-                    chapter,
-                    verses: Some(verses),
-                } => {
-                    let check_verse = |num: usize| {
-                        let verses = book[*chapter].len();
-                        if num > verses {
-                            Err(Error::InvalidVerse {
-                                num,
-                                title: book.title.to_string(),
-                                chapter: *chapter,
-                                verses,
-                            })
-                        } else {
-                            Ok(())
-                        }
-                    };
-                    match verses {
-                        Verses::Single(verse) => {
-                            check_verse(*verse)?;
-                            writeln!(
-                                &mut out,
-                                "[{} {}:{}] {}",
-                                alias,
-                                chapter + 1,
-                                verse + 1,
-                                book[*chapter][*verse]
-                            )?;
-                        }
-                        Verses::Range(range) => {
-                            for v in book[*chapter][range.clone()].iter().enumerate() {
-                                writeln!(
-                                    &mut out,
-                                    "[{} {}:{}] {}",
-                                    alias,
-                                    chapter + 1,
-                                    v.0 + 1 + range.start(),
-                                    v.1
-                                )?;
-                            }
-                        }
-                    }
-                }
-                Chapter::Single { chapter, .. } => {
-                    for v in book[*chapter].iter().enumerate() {
-                        writeln!(&mut out, "[{} {}:{}] {}", alias, chapter + 1, v.0 + 1, v.1)?;
-                    }
-                }
-                Chapter::Range(range) => {
-                    for ch in book[range.clone()].iter().enumerate() {
-                        for v in ch.1.iter().enumerate() {
-                            writeln!(
-                                &mut out,
-                                "[{} {}:{}] {}",
-                                alias,
-                                ch.0 + 1 + range.start(),
-                                v.0 + 1,
-                                v.1
-                            )?;
-                        }
-                    }
-                }
-            }
-        } else {
-            // print entire book!
-            for ch in BOOKS[num].chapters.iter().enumerate() {
-                for v in ch.1.iter().enumerate() {
-                    writeln!(&mut out, "[{} {}:{}] {}", alias, ch.0 + 1, v.0 + 1, v.1)?;
-                }
-            }
-        }
-
-        Ok(out)
-    }
 }
 
 #[derive(Debug, Options)]
@@ -209,7 +122,10 @@ impl FromStr for Verses {
 fn parse_number(input: &str) -> Result<usize, Error> {
     input
         .parse::<usize>()
-        .map(|n| n.checked_sub(1).ok_or(Error::InvalidInput(n.to_string())))
+        .map(|n| {
+            n.checked_sub(1)
+                .ok_or_else(|| Error::InvalidInput(n.to_string()))
+        })
         .map_err(|_| Error::InvalidInput(input.to_string()))?
 }
 

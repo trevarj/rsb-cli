@@ -90,8 +90,8 @@ fn main() {
         impl std::ops::Index<std::ops::RangeFull> for Book {
             type Output = [&'static [&'static str]];
 
-            fn index(&self, range: std::ops::RangeFull) -> &Self::Output {
-                &self.chapters[range]
+            fn index(&self, _range: std::ops::RangeFull) -> &Self::Output {
+                self.chapters
             }
         }
 
