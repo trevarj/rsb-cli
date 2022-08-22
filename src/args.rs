@@ -3,7 +3,7 @@ use std::str::FromStr;
 
 use gumdrop::Options;
 
-/// Read the Russian Sinod Bible from the command-line
+/// Read the Russian Synodal Bible from the command-line
 #[derive(Debug, Options)]
 pub struct Args {
     /// prints help message
